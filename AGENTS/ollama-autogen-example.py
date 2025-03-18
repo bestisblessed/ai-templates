@@ -12,7 +12,7 @@ config_list = [
 ]
 
 # Create the directory if it doesn't exist
-os.makedirs("/Users/td/Code/ai-templates/AGENTS/coding", exist_ok=True)
+os.makedirs("/Users/td/Code/ai-templates/AGENTS", exist_ok=True)
 
 # Create an AssistantAgent with the Code Llama model and better instructions
 system_message = """You are a helpful AI assistant that writes Python code.
