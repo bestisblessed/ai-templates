@@ -1,0 +1,73 @@
+td@Mac ~/Code/ai-templates/AGENTS % /Users/td/.pyenv/versions/3.12.0/bin/python /Users/td/Code/ai-templates/AGENTS/open-ai-agents.py
+Here are three recent events as of March 18, 2025:
+
+1. **Israel Launches Airstrikes Across Gaza**: Early Tuesday, Israel initiated a significant wave of airstrikes targeting Hamas positions throughout Gaza, resulting in over 320 fatalities, according to Gaza’s Health Ministry. This marks the most substantial assault since a ceasefire took effect in January. The strikes were ordered by Israeli Prime Minister Benjamin Netanyahu due to stalled ceasefire extension talks. The White House has expressed support for Israel’s actions, while Hamas condemned the airstrikes, claiming they breached the ceasefire and endangered hostages. ([apnews.com](https://apnews.com/article/81475aeec8e8d34e5cb93a1506df88cc?utm_source=openai))
+
+2. **Kenya Seeks New IMF Deal**: Kenya has reached an agreement with the International Monetary Fund (IMF) to abandon its current lending program and pursue a new one, as the country faces mounting debt-servicing costs from extensive government borrowing. The existing programs, worth $3.6 billion, were set to expire next month. Kenya's debt-to-GDP ratio stood at 65.7% as of June last year, surpassing the sustainable threshold of 55%. The government is seeking new funding to manage its debt and finance critical expenditures. ([reuters.com](https://www.reuters.com/world/africa/imf-has-received-formal-request-new-kenya-funding-programme-2025-03-17/?utm_source=openai))
+
+3. **Advancements in Robotics**: Recent developments in artificial intelligence have enabled companies like Google DeepMind and Microsoft to create robots capable of complex tasks such as folding origami, organizing desks, and performing kitchen duties. These robots utilize the reasoning capabilities of large language models to adapt to complex environments and learn rapidly from internet-sourced data. While challenges remain, including improving autonomous human interactions and adapting to unpredictable environments, the potential benefits of smarter robots are substantial, including supporting a shrinking workforce and aiding disaster recovery. ([ft.com](https://www.ft.com/content/62b89c94-e5be-4093-97a5-d934c153662b?utm_source=openai))
+
+
+## Recent Global Developments:
+- [Middle East latest: More than 320 killed as Israel launches airstrikes across Gaza](https://apnews.com/article/81475aeec8e8d34e5cb93a1506df88cc?utm_source=openai)
+- [Kenya seeks new IMF deal after abandoning latest review](https://www.reuters.com/world/africa/imf-has-received-formal-request-new-kenya-funding-programme-2025-03-17/?utm_source=openai)
+- [Robots are getting smarter - and that's a good thing](https://www.ft.com/content/62b89c94-e5be-4093-97a5-d934c153662b?utm_source=openai) 
+Max Holloway Most Recent 3 Fights and Outcomes:
+                                      Event Name                Event Date       Opponent Outcome Winning Method
+                  UFC 308 - Topuria vs. Holloway 2024-10-26 00:00:00+00:00   Ilia Topuria    Loss   KO (Punches)
+                      UFC 300 - Pereira vs. Hill 2024-04-13 00:00:00+00:00 Justin Gaethje     Win     KO (Punch)
+UFC Fight Night 225 - Holloway vs. Korean Zombie 2023-08-26 00:00:00+00:00 Chan Sung Jung     Win     KO (Punch)
+Fight Analyst
+
+Below is the process I followed to answer your question:
+
+1. I filtered the fighter dataframe (fighter_df) to include only those rows where Max Holloway was one of the fighters.
+2. I converted the key date column to datetime and sorted the data in descending order so that the most recent fights appear first.
+3. I then selected the top 3 rows (most recent 3 fights).
+4. I computed the outcome for Max by checking whether he is listed as the "Winning Fighter". Also, I identified his opponent in each fight.
+5. Finally, the table presents the event name, event date, opponent, outcome (Win/Loss), and the winning method of the fight.
+
+You can refer to the table below which is generated from the dataset:
+
+(Max Holloway Most Recent 3 Fights and Outcomes:)
+
+[Table printed in the output]
+
+The table contains the following columns:
+• Event Name – the title of the event
+• Event Date – when the fight took place
+• Opponent – the fighter he faced
+• Outcome – whether Max Holloway won or lost
+• Winning Method – the method or decision by which the fight was concluded
+
+This analysis provides insights into Max Holloway’s performance in his most recent bouts, showing not only the result of the fight but also information on his opponent and the fight's conclusion method. 
+
+If you need a deeper dive into any of these fights or additional analysis, please let me know!
+The weight class with the most fighters is Lightweight with 963 fighters.
+Fight Analyst
+
+I analyzed the fighter dataframe by counting the number of fighters by their "Weight Class". The analysis showed that one particular weight class has the most fighters. The horizontal bar plot visualizes the fighter counts across all weight classes.
+
+From the Python output, we now know exactly which weight class had the greatest representation and how many fighters it comprises. This insight can be very useful if you're looking into trends such as popularity, competition level, or fighter demographics within each weight class.
+
+If you have any more questions or need further analysis, let me know!
+The next UFC event is UFC Fight Night: Emmett vs. Murphy, also known as UFC Vegas 105, scheduled for Saturday, April 5, 2025, at the UFC Apex in Las Vegas. ([schedule.fightmag.com](https://schedule.fightmag.com/events/ufc-fight-night-april-5-2025/?utm_source=openai))
+
+**Main Card:**
+- Featherweight Bout: Josh Emmett vs. Lerone Murphy
+- Featherweight Bout: Pat Sabatini vs. Joanderson Brito
+- Bantamweight Bout: Cortavious Romious vs. Chang Ho Lee
+- Heavyweight Bout: Kennedy Nzechukwu vs. Martin Buday
+- Middleweight Bout: Brad Tavares vs. Gerald Meerschaert
+- Middleweight Bout: Torrez Finney vs. Robert Valentin
+
+**Preliminary Card:**
+- Flyweight Bout: Ode Osbourne vs. Luis Gurule
+- Bantamweight Bout: Davey Grant vs. Daniel Santos
+- Welterweight Bout: Rhys McKee vs. Daniel Frunza
+- Flyweight Bout: Diana Belbita vs. Dione Barbosa
+- Strawweight Bout: Loma Lookboonmee vs. Ariane Carnelossi
+- Bantamweight Bout: Victor Henry vs. Pedro Falcao
+- Strawweight Bout: Vanessa Demopoulos vs. Talita Alencar
+
+Please note that fight cards are subject to change. For the most up-to-date information, you can visit the official UFC website or their social media channels. 
