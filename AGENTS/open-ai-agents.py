@@ -27,29 +27,6 @@ fighter_df = pd.read_csv(FIGHTER_CSV_PATH)
 event_df = pd.read_csv(EVENT_CSV_PATH)
 
 # MMA-specific tools
-# @function_tool
-# def execute_mma_analysis(code: str) -> str:
-#     """Execute Python code for UFC/MMA data analysis and visualization."""
-#     repl = PythonAstREPLTool(locals={
-#         "pd": pd,
-#         "plt": plt,
-#         "fighter_df": fighter_df,
-#         "event_df": event_df
-#     })
-#     try:
-#         return repl.run(code)
-#     except Exception as e:
-#         return f"Error executing code: {str(e)}"
-# @function_tool
-# def get_csv_data_info() -> str:
-#     """Get information about the available UFC/MMA CSV data."""
-#     fighter_info = f"Fighter DataFrame: {len(fighter_df)} rows, {len(fighter_df.columns)} columns\nColumns: {', '.join(fighter_df.columns)}\n"
-#     event_info = f"Event DataFrame: {len(event_df)} rows, {len(event_df.columns)} columns\nColumns: {', '.join(event_df.columns)}\n"
-#     fighter_sample = f"Sample fighter data:\n{fighter_df.head(3).to_string()}\n"
-#     event_sample = f"Sample event data:\n{event_df.head(3).to_string()}"
-    
-#     return fighter_info + event_info + fighter_sample + event_sample
-# Create a secure Python execution tool that also saves generated images
 @function_tool
 def execute_python_code(code: str) -> str:
     """Execute Python code to analyze UFC/MMA data and create visualizations.
