@@ -4,6 +4,7 @@ import anthropic
 import os
 import json
 import traceback
+import asyncio
 
 # Anthropic client
 def get_claude_client():
@@ -64,72 +65,73 @@ async def analyze_csv_with_mcp():
                         print("Warning: analyze_csv tool not found in available tools")
                         print("Attempting to call it anyway...")
                     
-                    # # Call the analyze_csv tool
-                    # print(f"Calling analyze_csv tool with arguments: {json.dumps(arguments)}")
-                    # result = await session.call_tool("analyze_csv", arguments=arguments)
-                    
-                    # print(f"Result type: {type(result)}")
-                    
-                    
                     # Call the analyze_csv tool
                     print(f"Calling analyze_csv tool with arguments: {json.dumps(arguments)}")
-                    result = await session.call_tool("analyze_csv", arguments=arguments)
                     
-                    print(f"Result type: {type(result)}")
+                    # Add timeout for the call_tool operation
+                    try:
+                        result = await asyncio.wait_for(
+                            session.call_tool("analyze_csv", arguments=arguments),
+                            timeout=12  # 12 second timeout for the tool call
+                        )
+                        print(f"Tool call completed! Result type: {type(result)}")
+                    except asyncio.TimeoutError:
+                        print("Tool call timed out!")
+                        raise TimeoutError("Tool call timed out after 12 seconds")
                     
-                    # Simplified result handling
-                    if hasattr(result, 'content'):
-                        return result.content[0].text
-                    elif isinstance(result, (list, tuple)) and result:
-                        return result[0].text if hasattr(result[0], 'text') else str(result[0])
-                    else:
-                        return str(result)
-                    
-                    # # Handle ToolResult specifically
-                    # if hasattr(result, 'content') and len(result.content) > 0:
-                    #     content = result.content[0]
-                    #     if hasattr(content, 'text'):
-                    #         return content.text
-                    #     else:
-                    #         print(f"Content has no 'text' attribute: {content}")
-                    #         return json.dumps(content.__dict__)
-                    # elif isinstance(result, list) and len(result) > 0:
-                    #     if hasattr(result[0], 'text'):
-                    #         return result[0].text
-                    #     else:
-                    #         print(f"Result item has no 'text' attribute: {result[0]}")
-                    #         return json.dumps(result[0].__dict__ if hasattr(result[0], '__dict__') else str(result[0]))
-                    # else:
-                    #     raise ValueError(f"Unable to extract text from result: {result}")
+                    # Simplified result handling with more debug info
+                    print("Processing result...")
+                    try:
+                        if hasattr(result, 'content') and result.content:
+                            print(f"Result has content field with {len(result.content)} items")
+                            text_value = result.content[0].text
+                            print(f"Got text of length: {len(text_value)}")
+                            return text_value
+                        elif isinstance(result, (list, tuple)) and result:
+                            print(f"Result is list/tuple with {len(result)} items")
+                            if hasattr(result[0], 'text'):
+                                text_value = result[0].text
+                                print(f"Got text of length: {len(text_value)}")
+                                return text_value
+                            else:
+                                print(f"Result item has no 'text' attribute: {type(result[0])}")
+                                return str(result[0])
+                        else:
+                            print(f"Unexpected result format: {type(result)}")
+                            return str(result)
+                    except Exception as e:
+                        print(f"Error extracting text from result: {str(e)}")
+                        return f"Error: {str(e)}"
+                        
             except Exception as e:
                 print(f"Error in ClientSession: {str(e)}")
                 traceback.print_exc()
                 raise
-    # except Exception as e:
-    #     print(f"Error in stdio_client: {str(e)}")
-    #     traceback.print_exc()
-    #     raise
     except Exception as e:
         print(f"Error in stdio_client: {str(e)}")
         traceback.print_exc()
         raise
     finally:
         # Force cleanup of resources
-        if 'session' in locals():
+        print("Cleaning up resources...")
+        if 'session' in locals() and session is not None:
             await session.close()
         if 'read' in locals() and 'write' in locals():
             await read.aclose()
             await write.aclose()
-            
+        print("Cleanup complete!")
+
 async def get_claude_insights(result_text):
     claude_client = get_claude_client()
     try:
+        print("Parsing analysis results...")
         analysis_results = json.loads(result_text)
         
         # Check if there was an error
         if isinstance(analysis_results, dict) and analysis_results.get("isError", False):
             return f"Error during analysis: {analysis_results.get('message', 'Unknown error')}"
         
+        print("Building prompt for Claude...")
         prompt = f"""
 Here are the analysis results of my CSV file:
 
@@ -152,34 +154,97 @@ Please interpret these results and provide insights. Focus on:
 2. Any anomalies or patterns
 3. Recommendations for further analysis or preprocessing
 """
-    except json.JSONDecodeError:
+        
+        print("\nGetting insights from Claude (streaming response)...")
+        try:
+            # Create streaming response with explicit timeout
+            stream = await asyncio.wait_for(
+                claude_client.messages.create(
+                    max_tokens=1024,
+                    model="claude-3.5-sonnet-20241022",
+                    messages=[{"role": "user", "content": prompt}],
+                    stream=True
+                ),
+                timeout=15  # 15 second timeout for initial connection
+            )
+            
+            # Collect the full response
+            full_response = ""
+            
+            # Print each chunk as it arrives - use async iteration with timeout
+            print("Starting stream processing...")
+            async for chunk in stream:
+                print(f"Received chunk type: {chunk.type}", end="\r")
+                if chunk.type == "content_block_delta":
+                    text = chunk.delta.text
+                    print(text, end="", flush=True)
+                    full_response += text
+            
+            print("\nStreaming complete!")
+            return full_response
+                
+        except asyncio.TimeoutError:
+            print("\nTimeout while waiting for Claude's response")
+            return "Analysis timed out while waiting for Claude's response"
+            
+    except json.JSONDecodeError as e:
+        print(f"\nError parsing JSON result: {str(e)}")
+        # Fallback to non-JSON handling
         prompt = f"Here are the analysis results of my CSV file. Please interpret these results and provide insights:\n\n{result_text}"
-    
-    message = claude_client.messages.create(
-        model="claude-3.5-sonnet-20241022",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content
+        
+        try:
+            # Non-streaming fallback
+            message = await asyncio.wait_for(
+                claude_client.messages.create(
+                    model="claude-3.5-sonnet-20241022",
+                    max_tokens=1024,
+                    messages=[{"role": "user", "content": prompt}]
+                ),
+                timeout=30
+            )
+            return message.content
+        except Exception as e:
+            return f"Error getting insights (fallback): {str(e)}"
+    except Exception as e:
+        print(f"\nError in streaming response: {str(e)}")
+        traceback.print_exc()
+        return f"Error getting insights: {str(e)}"
 
 async def amain():
     try:
-        result_text = await analyze_csv_with_mcp()
+        # Add overall timeout for the entire process
+        result_text = await asyncio.wait_for(
+            analyze_csv_with_mcp(),
+            timeout=30  # 30 second timeout for the entire CSV analysis
+        )
+        
         print("\nRaw Analysis Results:")
         print(result_text)
         
-        insights = await get_claude_insights(result_text)
-        print("\nClaude's Insights:")
-        print(insights)
+        print("\nStreaming Claude's analysis...")
+        try:
+            insights = await asyncio.wait_for(
+                get_claude_insights(result_text),
+                timeout=45  # 45 second timeout for Claude's analysis
+            )
+            print("\nAnalysis complete!")
+        except asyncio.TimeoutError:
+            print("\nTimed out waiting for Claude's analysis!")
+            insights = "Analysis timed out. Please try again later."
         
-        print("\nAnalysis complete! Check the 'reports' directory for the full HTML report.")
+    except asyncio.TimeoutError:
+        print("\nTimed out during CSV analysis!")
     except Exception as e:
-        print(f"Error during analysis: {str(e)}")
+        print(f"\nError during analysis: {str(e)}")
         traceback.print_exc()
 
 if __name__ == "__main__":
     import anyio
-    anyio.run(amain)
+    try:
+        anyio.run(amain)  # Remove the clock_rate parameter
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user")
+    print("\nProgram completed")
 
 # from mcp import ClientSession, StdioServerParameters
 # from mcp.client.stdio import stdio_client
